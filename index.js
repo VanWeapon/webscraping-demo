@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 
     let url = "https://www.imdb.com/title/tt2575988/?ref_=nv_sr_srsg_0";
 
-    let browser = await puppeteer.launch();
+    let browser = await puppeteer.launch({headless: false});
     let page = await browser.newPage();
 
     await page.goto(url, {waitUntil: 'networkidle2'});
@@ -14,10 +14,18 @@ const puppeteer = require('puppeteer');
         let rating = document.querySelector('span[itemprop="ratingValue"]').innerText;
         let ratingCount = document.querySelector('span[itemprop="ratingCount"]').innerText;
 
+
         return {
             title,
             rating,
             ratingCount
         };
     });
+
+    console.log(data);
+
+    debugger;
+
+    await browser.close();
+
 })();
