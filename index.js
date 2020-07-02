@@ -1,31 +1,52 @@
 const puppeteer = require('puppeteer');
+let tickers = ["CBA.AX", 
+"QAN.AX", 
+"TSLA", 
+"CSL.AX", 
+"SCG.AX", 
+"NAB.AX", 
+"TLS.AX",
+"BHP.AX"
+];
 
-(async () => {
+async function runPuppet(ticker){
 
-    let url = "https://www.imdb.com/title/tt2575988/?ref_=nv_sr_srsg_0";
+    let url = "https://au.finance.yahoo.com/";
 
-    let browser = await puppeteer.launch({headless: false});
+    let browser = await puppeteer.launch({headless: true});
     let page = await browser.newPage();
 
-    await page.goto(url, {waitUntil: 'networkidle2'});
+    await page.goto(url, { waitUntil: "networkidle2" });
+	await page.type("input[id='yfin-usr-qry']", ticker);
+    await page.click("button[id='search-button'");
+    await page.waitForNavigation({waitUntil: 'networkidle2'});
+    
 
     let data = await page.evaluate(() => {
-        let title = document.querySelector('div[class="title_wrapper"] > h1').innerText.trim();
-        let rating = document.querySelector('span[itemprop="ratingValue"]').innerText;
-        let ratingCount = document.querySelector('span[itemprop="ratingCount"]').innerText;
 
+        let header = document.querySelector('div[id="quote-header-info"]');
+
+        let spans = header.children[2].firstChild.querySelectorAll('span');
+        let price = spans[0].innerText;
+        let movements = spans[1].innerText.split(' ');
+        let movementAmount = movements[0];
+        let movementPercent = movements[1];
+
+        let companyName = header.querySelector('h1').innerText;
 
         return {
-            title,
-            rating,
-            ratingCount
+            companyName,
+            price,
+            movementAmount,
+            movementPercent
         };
     });
+    data.ticker = ticker;
 
     console.log(data);
 
-    debugger;
-
     await browser.close();
 
-})();
+};
+
+tickers.forEach(ticker => runPuppet(ticker));
